@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.jchien.twitchbrowser";
+option java_outer_classname = "TwitchBrowserProto";
+
+package twitchbrowser;
+
+// The greeting service definition.
+service TwitchBrowserService {
+    rpc getStreams(StreamsRequest) returns (StreamsResponse) {}
+    rpc getPopularGames(PopularGamesRequest) returns (PopularGamesResponse) {}
+}
+
+message StreamsRequest {
+    repeated string gameNames = 1;
+    int32 limit = 2;
+    bool forceFresh = 3;
+}
+
+message StreamsResponse {
+    repeated TwitchStream streams = 1;
+    bool fromCache = 2;
+}
+
+message PopularGamesRequest {
+    int32 limit = 1;
+}
+
+message PopularGamesResponse {
+    repeated TwitchGame games = 1;
+}
+
+message TwitchStream {
+    string displayName = 1;
+    string channelName = 2;
+    string channelUrl = 3;
+    int32 numViewers = 4;
+    string status = 5;
+    string gameName = 6;
+    string previewUrl = 7;
+}
+
+message TwitchGame {
+    string gameName = 1;
+    int64 id = 2;
+    int64 gamebombId = 3;
+    int32 numViewers = 4;
+    int32 numChannels = 5;
+
+    string boxArtSmallUrl = 20;
+    string logoSmallUrl = 21;
+}
