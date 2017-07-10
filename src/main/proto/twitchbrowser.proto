@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/descriptor.proto";
+
 option java_multiple_files = true;
 option java_package = "org.jchien.twitchbrowser";
 option java_outer_classname = "TwitchBrowserProto";
@@ -32,22 +34,27 @@ message PopularGamesResponse {
 }
 
 message TwitchStream {
-    string displayName = 1;
-    string channelName = 2;
-    string channelUrl = 3;
-    int32 numViewers = 4;
-    string status = 5;
-    string gameName = 6;
-    string previewUrl = 7;
+    string displayName = 1 [ (jsonPath) = "channel", (jsonPath) = "display_name" ];
+    string channelName = 2 [ (jsonPath) = "channel", (jsonPath) = "name" ];
+    string channelUrl = 3 [ (jsonPath) = "channel", (jsonPath) = "url" ];
+    int32 numViewers = 4 [ (jsonPath) = "viewers" ];
+    string status = 5 [ (jsonPath) = "channel", (jsonPath) = "status" ];
+    string gameName = 6 [ (jsonPath) = "game" ];
+    string previewUrl = 7 [ (jsonPath) = "preview", (jsonPath) = "medium" ];
 }
 
 message TwitchGame {
-    string gameName = 1;
-    int64 id = 2;
-    int64 gamebombId = 3;
-    int32 numViewers = 4;
-    int32 numChannels = 5;
+    string gameName = 1 [ (jsonPath) = "game", (jsonPath) = "name" ];
+    int64 id = 2 [ (jsonPath) = "_id" ];
+    int64 gamebombId = 3 [ (jsonPath) = "game", (jsonPath) = "gamebomb_id" ];
+    int32 numViewers = 4 [ (jsonPath) = "viewers" ];
+    int32 numChannels = 5 [ (jsonPath) = "channels" ];
 
-    string boxArtSmallUrl = 20;
-    string logoSmallUrl = 21;
+    string boxArtSmallUrl = 20 [ (jsonPath) = "game", (jsonPath) = "box", (jsonPath) = "small" ];
+    string logoSmallUrl = 21 [ (jsonPath) = "game", (jsonPath) = "logo", (jsonPath) = "small" ];
+}
+
+// https://developers.google.com/protocol-buffers/docs/proto#customoptions
+extend google.protobuf.FieldOptions {
+    repeated string jsonPath = 50000;
 }
