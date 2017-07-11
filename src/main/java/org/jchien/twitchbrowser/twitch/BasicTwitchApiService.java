@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.*;
 import org.jchien.twitchbrowser.TwitchGame;
 import org.jchien.twitchbrowser.TwitchStream;
-import org.jchien.twitchbrowser.json.ProtoJsonPathOptionDeserializer;
+import org.jchien.twitchbrowser.json.ProtoJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +26,8 @@ public class BasicTwitchApiService implements TwitchApiService {
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
-            .registerTypeAdapter(TwitchStream.class, new ProtoJsonPathOptionDeserializer<>(TwitchStream.class))
-            .registerTypeAdapter(TwitchGame.class, new ProtoJsonPathOptionDeserializer<>(TwitchGame.class))
+            .registerTypeAdapter(TwitchStream.class, new ProtoJsonDeserializer<>(TwitchStream.class))
+            .registerTypeAdapter(TwitchGame.class, new ProtoJsonDeserializer<>(TwitchGame.class))
             .create();
 
     private static final String HOST = "https://api.twitch.tv";
@@ -185,6 +185,14 @@ public class BasicTwitchApiService implements TwitchApiService {
                 }
             }
             return tgList;
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        BasicTwitchApiService s = new BasicTwitchApiService();
+        List<TwitchStream> streams = s.getStreams("Dota 2", 10, true);
+        for (TwitchStream stream : streams) {
+            System.out.println(stream);
         }
     }
 }

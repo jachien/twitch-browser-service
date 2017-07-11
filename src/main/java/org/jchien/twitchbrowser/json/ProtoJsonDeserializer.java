@@ -1,10 +1,20 @@
 package org.jchien.twitchbrowser.json;
 
-import com.google.gson.*;
-import com.google.protobuf.*;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.protobuf.DescriptorProtos;
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.Message;
 import org.jchien.twitchbrowser.TwitchBrowserProto;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +22,12 @@ import java.util.List;
 /**
  * @author jchien
  */
-public class ProtoJsonPathOptionDeserializer<E extends AbstractMessage> implements JsonDeserializer<E> {
-    private final Class<? extends AbstractMessage> klazz;
+public class ProtoJsonDeserializer<E extends GeneratedMessageV3> implements JsonDeserializer<E> {
+    private final Class<? extends GeneratedMessageV3> klazz;
 
     private final List<JsonPathAndFieldDescriptor> jsonPathsAndFieldDescriptors;
 
-    public ProtoJsonPathOptionDeserializer(Class<? extends AbstractMessage> klazz) {
+    public ProtoJsonDeserializer(Class<? extends GeneratedMessageV3> klazz) {
         this.klazz = klazz;
 
         final Descriptors.Descriptor msgDescriptor = invokeStaticOrDie("getDescriptor");
@@ -44,7 +54,8 @@ public class ProtoJsonPathOptionDeserializer<E extends AbstractMessage> implemen
 
     private <T> T invokeStaticOrDie(String methodName) {
         try {
-            return (T) klazz.getMethod(methodName).invoke(null);
+            Method m = klazz.getMethod(methodName);
+            return (T) m.invoke(null);
         } catch (IllegalAccessException
                 | NoSuchMethodException
                 | InvocationTargetException e) {
@@ -55,7 +66,7 @@ public class ProtoJsonPathOptionDeserializer<E extends AbstractMessage> implemen
 
     @Override
     public E deserialize(JsonElement json, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-        Message.Builder builder = invokeStaticOrDie("newBuilderForType");
+        E.Builder builder = invokeStaticOrDie("newBuilder");
         final JsonObject root = json.getAsJsonObject();
         for (JsonPathAndFieldDescriptor jpafd : jsonPathsAndFieldDescriptors) {
             parseValue(builder, jpafd.fieldDescriptor, jpafd.jsonPath, root);
