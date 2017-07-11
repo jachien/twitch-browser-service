@@ -33,6 +33,7 @@ repositories {
 // Feel free to delete the comment at the next line. It is just for safely
 // updating the version in our release process.
 def grpcVersion = '1.4.0' // CURRENT_GRPC_VERSION
+def log4j2Version = '2.8.2'
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
@@ -42,8 +43,9 @@ dependencies {
     compile "io.grpc:grpc-protobuf:${grpcVersion}"
     compile "io.grpc:grpc-stub:${grpcVersion}"
 
-    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
-    //compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.2'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: "${log4j2Version}"
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: "${log4j2Version}"
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: "${log4j2Version}"
 
     // https://mvnrepository.com/artifact/com.google.guava/guava
     compile group: 'com.google.guava', name: 'guava', version: '22.0'
