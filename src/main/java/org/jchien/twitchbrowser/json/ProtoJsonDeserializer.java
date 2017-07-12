@@ -66,10 +66,16 @@ public class ProtoJsonDeserializer<E extends GeneratedMessageV3> implements Json
 
     @Override
     public E deserialize(JsonElement json, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-        E.Builder builder = invokeStaticOrDie("newBuilder");
+        final E.Builder builder = invokeStaticOrDie("newBuilder");
         final JsonObject root = json.getAsJsonObject();
         for (JsonPathAndFieldDescriptor jpafd : jsonPathsAndFieldDescriptors) {
-            parseValue(builder, jpafd.fieldDescriptor, jpafd.jsonPath, root);
+            final Descriptors.FieldDescriptor fd = jpafd.fieldDescriptor;
+            final List<String> jsonPath = jpafd.jsonPath;
+            try {
+                parseValue(builder, fd, jsonPath, root);
+            } catch (Exception e) {
+                throw new JsonParseException("failed to parse jsonPath=" + jsonPath + " for field " + fd.getName());
+            }
         }
         return (E) builder.build();
     }
@@ -85,7 +91,7 @@ public class ProtoJsonDeserializer<E extends GeneratedMessageV3> implements Json
         final JsonPrimitive p = o.getAsJsonPrimitive(jsonPath.get(jsonPath.size()-1));
 
         // interpret value using appropriate method based on field type
-        Descriptors.FieldDescriptor.JavaType fieldType = fieldDescriptor.getJavaType();
+        final Descriptors.FieldDescriptor.JavaType fieldType = fieldDescriptor.getJavaType();
         switch (fieldType) {
             case INT:
                 builder.setField(fieldDescriptor, p.getAsInt());
