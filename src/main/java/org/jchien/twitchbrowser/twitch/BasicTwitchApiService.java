@@ -4,8 +4,6 @@ import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.collect.Lists;
 import com.google.gson.*;
-import org.jchien.twitchbrowser.TwitchGame;
-import org.jchien.twitchbrowser.TwitchStream;
 import org.jchien.twitchbrowser.json.ProtoJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,6 +183,10 @@ public class BasicTwitchApiService implements TwitchApiService {
             }
             return tgList;
         }
+    }
+
+    @Override
+    public void shutdown() {
     }
 
     public static void main(String[] args) throws IOException {

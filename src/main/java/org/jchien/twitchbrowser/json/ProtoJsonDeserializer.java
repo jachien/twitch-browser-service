@@ -12,6 +12,7 @@ import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import org.jchien.twitchbrowser.TwitchBrowserProto;
+import org.jchien.twitchbrowser.twitch.TwitchProto;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -31,7 +32,7 @@ public class ProtoJsonDeserializer<E extends GeneratedMessageV3> implements Json
         this.klazz = klazz;
 
         final Descriptors.Descriptor msgDescriptor = invokeStaticOrDie("getDescriptor");
-        final GeneratedMessage.GeneratedExtension<DescriptorProtos.FieldOptions, List<String>> jsonPathExt = TwitchBrowserProto.jsonPath;
+        final GeneratedMessage.GeneratedExtension<DescriptorProtos.FieldOptions, List<String>> jsonPathExt = TwitchProto.jsonPath;
         final List<Descriptors.FieldDescriptor> fieldDescriptors = msgDescriptor.getFields();
 
         final List<JsonPathAndFieldDescriptor> jsonPathsAndFieldDescriptors = new ArrayList<>();

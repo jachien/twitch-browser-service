@@ -5,6 +5,8 @@ import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 import org.jchien.twitchbrowser.twitch.BasicTwitchApiService;
 import org.jchien.twitchbrowser.twitch.TwitchApiService;
+import org.jchien.twitchbrowser.twitch.TwitchGame;
+import org.jchien.twitchbrowser.twitch.TwitchStream;
 
 import java.io.IOException;
 import java.util.List;

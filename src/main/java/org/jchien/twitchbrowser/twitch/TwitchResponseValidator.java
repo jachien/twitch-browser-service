@@ -1,7 +1,5 @@
 package org.jchien.twitchbrowser.twitch;
 
-import org.jchien.twitchbrowser.TwitchStream;
-
 /**
  * @author jchien
  */
