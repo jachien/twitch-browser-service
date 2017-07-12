@@ -45,8 +45,8 @@ message TwitchStream {
 
 message TwitchGame {
     string gameName = 1 [ (jsonPath) = "game", (jsonPath) = "name" ];
-    int64 id = 2 [ (jsonPath) = "_id" ];
-    int64 gamebombId = 3 [ (jsonPath) = "game", (jsonPath) = "gamebomb_id" ];
+    int64 id = 2 [ (jsonPath) = "game", (jsonPath) = "_id" ];
+    int64 gamebombId = 3 [ (jsonPath) = "game", (jsonPath) = "giantbomb_id" ];
     int32 numViewers = 4 [ (jsonPath) = "viewers" ];
     int32 numChannels = 5 [ (jsonPath) = "channels" ];
 
