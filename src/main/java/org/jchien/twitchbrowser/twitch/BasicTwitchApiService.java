@@ -155,7 +155,7 @@ public class BasicTwitchApiService implements TwitchApiService {
             final JsonArray streams = root.getAsJsonArray("streams");
             for (JsonElement stream : streams) {
                 try {
-                    String json = GSON.toJson(stream);
+                    final String json = GSON.toJson(stream);
                     final TwitchStream tsm = GSON.fromJson(json, TwitchStream.class);
                     tsmList.add(tsm);
                     if (!TwitchResponseValidator.isValid(tsm)) {
@@ -176,8 +176,7 @@ public class BasicTwitchApiService implements TwitchApiService {
             final JsonArray topGames = root.getAsJsonArray("top");
             for (JsonElement gameJson : topGames) {
                 try {
-                    String json = GSON.toJson(gameJson);
-
+                    final String json = GSON.toJson(gameJson);
                     final TwitchGame game = GSON.fromJson(json, TwitchGame.class);
                     tgList.add(game);
                 } catch (Exception e) {
@@ -190,9 +189,14 @@ public class BasicTwitchApiService implements TwitchApiService {
 
     public static void main(String[] args) throws IOException {
         BasicTwitchApiService s = new BasicTwitchApiService();
-        List<TwitchStream> streams = s.getStreams("Dota 2", 10, true);
+        /*List<TwitchStream> streams = s.getStreams("Dota 2", 10, true);
         for (TwitchStream stream : streams) {
             System.out.println(stream);
+        }*/
+
+        List<TwitchGame> games = s.getPopularGames(10);
+        for(TwitchGame g : games) {
+            System.out.println(g);
         }
     }
 }
