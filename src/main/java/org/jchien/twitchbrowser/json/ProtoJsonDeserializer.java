@@ -11,11 +11,9 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
-import org.jchien.twitchbrowser.TwitchBrowserProto;
 import org.jchien.twitchbrowser.twitch.TwitchProto;
+import org.jchien.twitchbrowser.util.ReflectionUtils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,14 +22,14 @@ import java.util.List;
  * @author jchien
  */
 public class ProtoJsonDeserializer<E extends GeneratedMessageV3> implements JsonDeserializer<E> {
-    private final Class<? extends GeneratedMessageV3> klazz;
+    private final Class<E> klazz;
 
     private final List<JsonPathAndFieldDescriptor> jsonPathsAndFieldDescriptors;
 
-    public ProtoJsonDeserializer(Class<? extends GeneratedMessageV3> klazz) {
+    public ProtoJsonDeserializer(Class<E> klazz) {
         this.klazz = klazz;
 
-        final Descriptors.Descriptor msgDescriptor = invokeStaticOrDie("getDescriptor");
+        final Descriptors.Descriptor msgDescriptor = ReflectionUtils.invokeStaticMethodOrDie(klazz, "getDescriptor");
         final GeneratedMessage.GeneratedExtension<DescriptorProtos.FieldOptions, List<String>> jsonPathExt = TwitchProto.jsonPath;
         final List<Descriptors.FieldDescriptor> fieldDescriptors = msgDescriptor.getFields();
 
@@ -53,21 +51,9 @@ public class ProtoJsonDeserializer<E extends GeneratedMessageV3> implements Json
         }
     }
 
-    private <T> T invokeStaticOrDie(String methodName) {
-        try {
-            Method m = klazz.getMethod(methodName);
-            return (T) m.invoke(null);
-        } catch (IllegalAccessException
-                | NoSuchMethodException
-                | InvocationTargetException e) {
-            // blow up for now
-            throw new RuntimeException("unable to call " + methodName + "() on " + klazz.getName(), e);
-        }
-    }
-
     @Override
     public E deserialize(JsonElement json, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-        final E.Builder builder = invokeStaticOrDie("newBuilder");
+        final E.Builder builder = ReflectionUtils.invokeStaticMethodOrDie(klazz, "newBuilder");
         final JsonObject root = json.getAsJsonObject();
         for (JsonPathAndFieldDescriptor jpafd : jsonPathsAndFieldDescriptors) {
             final Descriptors.FieldDescriptor fd = jpafd.fieldDescriptor;
