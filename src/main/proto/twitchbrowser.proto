@@ -8,7 +8,6 @@ option java_outer_classname = "TwitchBrowserProto";
 
 package twitchbrowser;
 
-// The greeting service definition.
 service TwitchBrowserService {
     rpc getStreams(StreamsRequest) returns (StreamsResponse) {}
     rpc getPopularGames(PopularGamesRequest) returns (PopularGamesResponse) {}
