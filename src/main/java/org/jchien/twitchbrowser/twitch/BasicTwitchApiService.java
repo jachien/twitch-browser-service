@@ -2,8 +2,11 @@ package org.jchien.twitchbrowser.twitch;
 
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.common.collect.Lists;
 import com.google.gson.*;
+import org.jchien.twitchbrowser.PopularGamesRequest;
+import org.jchien.twitchbrowser.PopularGamesResponse;
+import org.jchien.twitchbrowser.StreamsRequest;
+import org.jchien.twitchbrowser.StreamsResponse;
 import org.jchien.twitchbrowser.json.ProtoJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +15,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.List;
 
 /**
  * @author jchien
@@ -37,6 +39,8 @@ public class BasicTwitchApiService implements TwitchApiService {
     private static final int CONNECT_TIMEOUT_MS = 1000;
 
     private static final int READ_TIMEOUT_MS = 3000;
+
+    private static final int MAX_LIMIT = 25;
 
     private HttpRequest buildGetRequest(GenericUrl url) throws IOException {
         final HttpRequestFactory httpReqFactory = HTTP_TRANSPORT.createRequestFactory();
@@ -88,7 +92,10 @@ public class BasicTwitchApiService implements TwitchApiService {
     }
 
     @Override
-    public List<TwitchStream> getStreams(String gameName, int limit, boolean forceFresh) throws IOException {
+    public StreamsResponse getStreams(StreamsRequest request) throws IOException {
+        final String gameName = request.getGameName();
+        final int limit = Math.min(MAX_LIMIT, request.getLimit());
+
         final GenericUrl url = buildStreamsUrl(gameName, limit);
         final HttpRequest httpReq = buildGetRequest(url);
 
@@ -113,8 +120,8 @@ public class BasicTwitchApiService implements TwitchApiService {
     }
 
     @Override
-    public List<TwitchGame> getPopularGames(int limit) throws IOException {
-        final GenericUrl url = buildPopularGamesUrl(limit);
+    public PopularGamesResponse getPopularGames(PopularGamesRequest request) throws IOException {
+        final GenericUrl url = buildPopularGamesUrl(request.getLimit());
         final HttpRequest httpReq = buildGetRequest(url);
 
         final HttpResponse httpResp;
@@ -140,7 +147,7 @@ public class BasicTwitchApiService implements TwitchApiService {
         T handle(JsonObject root, String rawJson);
     }
 
-    private static class StreamsHandler implements JsonResponseHandler<List<TwitchStream>> {
+    private static class StreamsHandler implements JsonResponseHandler<StreamsResponse> {
         final String gameName;
 
         private StreamsHandler(String gameName) {
@@ -148,14 +155,18 @@ public class BasicTwitchApiService implements TwitchApiService {
         }
 
         @Override
-        public List<TwitchStream> handle(JsonObject root, String rawJson) {
-            final List<TwitchStream> tsmList = Lists.newArrayList();
+        public StreamsResponse handle(JsonObject root, String rawJson) {
+            final long resultTimestamp = System.currentTimeMillis();
+            final StreamsResponse.Builder response = StreamsResponse.newBuilder()
+                    .setTimestamp(resultTimestamp)
+                    .setFromCache(false);
+
             final JsonArray streams = root.getAsJsonArray("streams");
             for (JsonElement stream : streams) {
                 try {
                     final String json = GSON.toJson(stream);
                     final TwitchStream tsm = GSON.fromJson(json, TwitchStream.class);
-                    tsmList.add(tsm);
+                    response.addStreams(tsm);
                     if (!TwitchResponseValidator.isValid(tsm)) {
                         LOG.warn("Bad stream " + tsm + "\n from \n" + rawJson);
                     }
@@ -163,25 +174,25 @@ public class BasicTwitchApiService implements TwitchApiService {
                     LOG.error("failed to parse results for query " + gameName + ":\n" + root, e);
                 }
             }
-            return tsmList;
+            return response.build();
         }
     }
 
-    private static class GamesHandler implements JsonResponseHandler<List<TwitchGame>> {
+    private static class GamesHandler implements JsonResponseHandler<PopularGamesResponse> {
         @Override
-        public List<TwitchGame> handle(JsonObject root, String rawJson) {
-            final List<TwitchGame> tgList = Lists.newArrayList();
+        public PopularGamesResponse handle(JsonObject root, String rawJson) {
+            final PopularGamesResponse.Builder response = PopularGamesResponse.newBuilder();
             final JsonArray topGames = root.getAsJsonArray("top");
             for (JsonElement gameJson : topGames) {
                 try {
                     final String json = GSON.toJson(gameJson);
                     final TwitchGame game = GSON.fromJson(json, TwitchGame.class);
-                    tgList.add(game);
+                    response.addGames(game);
                 } catch (Exception e) {
                     LOG.error("failed to parse top games", e);
                 }
             }
-            return tgList;
+            return response.build();
         }
     }
 
@@ -191,14 +202,19 @@ public class BasicTwitchApiService implements TwitchApiService {
 
     public static void main(String[] args) throws IOException {
         BasicTwitchApiService s = new BasicTwitchApiService();
-        /*List<TwitchStream> streams = s.getStreams("Dota 2", 10, true);
-        for (TwitchStream stream : streams) {
-            System.out.println(stream);
-        }*/
+        StreamsRequest streamsRequest = StreamsRequest.newBuilder()
+                .setGameName("Dota 2")
+                .setLimit(10)
+                .build();
 
-        List<TwitchGame> games = s.getPopularGames(10);
-        for(TwitchGame g : games) {
-            System.out.println(g);
+        StreamsResponse streamsResponse = s.getStreams(streamsRequest);
+        for (TwitchStream stream : streamsResponse.getStreamsList()) {
+            System.out.println(stream);
         }
+
+        /*PopularGamesResponse popularGamesResponse = s.getPopularGames(PopularGamesRequest.newBuilder().setLimit(10).build());
+        for(TwitchGame g : popularGamesResponse.getGamesList()) {
+            System.out.println(g);
+        }*/
     }
 }

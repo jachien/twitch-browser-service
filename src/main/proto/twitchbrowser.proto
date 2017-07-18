@@ -15,14 +15,17 @@ service TwitchBrowserService {
 }
 
 message StreamsRequest {
-    repeated string gameNames = 1;
-    int32 limit = 2;
-    bool forceFresh = 3;
+    string gameName = 1;
+    int32 start = 2;
+    int32 limit = 3;
+    bool disallowCache = 4;
 }
 
 message StreamsResponse {
     repeated TwitchStream streams = 1;
-    bool fromCache = 2;
+    int32 start = 2;
+    int64 timestamp = 3;
+    bool fromCache = 4;
 }
 
 message PopularGamesRequest {

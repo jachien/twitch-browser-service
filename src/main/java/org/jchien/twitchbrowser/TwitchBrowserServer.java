@@ -47,17 +47,14 @@ public class TwitchBrowserServer {
         public void getStreams(StreamsRequest request, StreamObserver<StreamsResponse> responseObserver) {
             super.getStreams(request, responseObserver);
 
-            StreamsResponse.Builder builder = StreamsResponse.newBuilder();
-            for (String gameName : request.getGameNamesList()) {
-                try {
-                    List<TwitchStream> streams = twitchApiService.getStreams(gameName, request.getLimit(), request.getForceFresh());
-                    builder.addAllStreams(streams);
-                } catch (IOException e) {
-                    // what happens if multiple errors are sent?
-                    responseObserver.onError(e);
-                }
+            try {
+                StreamsResponse response = twitchApiService.getStreams(request);
+                responseObserver.onNext(response);
+            } catch (IOException e) {
+                // what happens if multiple errors are sent?
+                responseObserver.onError(e);
             }
-            responseObserver.onNext(builder.build());
+
             responseObserver.onCompleted();
         }
 
@@ -66,10 +63,7 @@ public class TwitchBrowserServer {
             super.getPopularGames(request, responseObserver);
 
             try {
-                List<TwitchGame> games = twitchApiService.getPopularGames(request.getLimit());
-                PopularGamesResponse response = PopularGamesResponse.newBuilder()
-                        .addAllGames(games)
-                        .build();
+                PopularGamesResponse response = twitchApiService.getPopularGames(request);
                 responseObserver.onNext(response);
             } catch (IOException e) {
                 responseObserver.onError(e);
