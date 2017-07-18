@@ -1,6 +1,5 @@
 package org.jchien.twitchbrowser.twitch;
 
-import com.google.common.collect.Lists;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.lambdaworks.redis.RedisClient;
 import com.lambdaworks.redis.RedisFuture;
@@ -10,14 +9,12 @@ import org.jchien.twitchbrowser.PopularGamesResponse;
 import org.jchien.twitchbrowser.StreamsRequest;
 import org.jchien.twitchbrowser.StreamsResponse;
 import org.jchien.twitchbrowser.cache.CacheResult;
-import org.jchien.twitchbrowser.cache.StreamsCacheEntry;
 import org.jchien.twitchbrowser.cache.StringByteArrayCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
