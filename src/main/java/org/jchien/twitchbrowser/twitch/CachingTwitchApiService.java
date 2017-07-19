@@ -185,7 +185,13 @@ public class CachingTwitchApiService implements TwitchApiService {
 
     @Override
     public void shutdown() {
+        LOG.info("shutting down");
+
+        // seems like log4j2 is getting shutdown before this log message happens so we'll print to stdout too
+        System.out.println("CachingTwitchApiService: shutting down");
+
         asyncCommands.close();
         redisClient.shutdown();
+        wrappedService.shutdown();
     }
 }
