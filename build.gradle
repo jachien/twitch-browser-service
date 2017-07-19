@@ -100,3 +100,20 @@ idea {
         sourceDirs += file("${projectDir}/build/generated/source/proto/main/grpc");
     }
 }
+
+// Provide convenience executables for trying out the examples.
+apply plugin: 'application'
+
+startScripts.enabled = false
+
+task twitchBrowserServer(type: CreateStartScripts) {
+    mainClassName = 'org.jchien.twitchbrowser.TwitchBrowserServer'
+    applicationName = 'twitch-browser-server'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = jar.outputs.files + project.configurations.runtime
+}
+
+applicationDistribution.into('bin') {
+    from(twitchBrowserServer)
+    fileMode = 0755
+}
