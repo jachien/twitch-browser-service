@@ -4,22 +4,28 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 import org.jchien.twitchbrowser.twitch.BasicTwitchApiService;
+import org.jchien.twitchbrowser.twitch.CachingTwitchApiService;
 import org.jchien.twitchbrowser.twitch.TwitchApiService;
-import org.jchien.twitchbrowser.twitch.TwitchGame;
-import org.jchien.twitchbrowser.twitch.TwitchStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * @author jchien
  */
 public class TwitchBrowserServer {
-    private static final Logger LOG = Logger.getLogger(TwitchBrowserServer.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(TwitchBrowserServer.class);
 
     private final int port;
+    private final TwitchApiService service;
     private final Server server;
+
+    public static void main(String[] args) throws Exception {
+        TwitchBrowserServer server = new TwitchBrowserServer(62898);
+        server.start();
+        server.blockUntilShutdown();
+    }
 
     public TwitchBrowserServer(int port) {
         this(ServerBuilder.forPort(port), port);
@@ -27,13 +33,47 @@ public class TwitchBrowserServer {
 
     public TwitchBrowserServer(ServerBuilder<?> serverBuilder, int port) {
         this.port = port;
-        server = serverBuilder.addService(new TwitchBrowserService(new BasicTwitchApiService()))
+
+        final TwitchApiService service = new CachingTwitchApiService(new BasicTwitchApiService());
+        this.service = service;
+
+        this.server = serverBuilder.addService(new TwitchBrowserService(service))
                 .build();
     }
 
+    /** Start serving requests. */
     public void start() throws IOException {
         server.start();
         LOG.info("Server started, listening on " + port);
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                // Use stderr here since the logger may has been reset by its JVM shutdown hook.
+                System.err.println("*** shutting down gRPC server since JVM is shutting down");
+                TwitchBrowserServer.this.stop();
+                System.err.println("*** server shut down");
+            }
+        });
+    }
+
+    /** Stop serving requests and shutdown resources. */
+    public void stop() {
+        if (service != null) {
+            service.shutdown();
+        }
+
+        if (server != null) {
+            server.shutdown();
+        }
+    }
+
+    /**
+     * Await termination on the main thread since the grpc library uses daemon threads.
+     */
+    private void blockUntilShutdown() throws InterruptedException {
+        if (server != null) {
+            server.awaitTermination();
+        }
     }
 
     private static class TwitchBrowserService extends TwitchBrowserServiceGrpc.TwitchBrowserServiceImplBase {
