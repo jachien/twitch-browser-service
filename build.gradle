@@ -6,10 +6,13 @@
  * user guide available at https://docs.gradle.org/4.0/userguide/tutorial_java_projects.html
  */
 
-
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 apply plugin: 'com.google.protobuf'
+
+group="org.jchien.twitchbrowser"
+version="1.0"
+sourceCompatibility="1.8"
 
 buildscript {
     repositories {
@@ -116,4 +119,23 @@ task twitchBrowserServer(type: CreateStartScripts) {
 applicationDistribution.into('bin') {
     from(twitchBrowserServer)
     fileMode = 0755
+}
+
+// https://docs.gradle.org/4.0/userguide/publishing_maven.html
+apply plugin: 'maven-publish'
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+    }
 }
