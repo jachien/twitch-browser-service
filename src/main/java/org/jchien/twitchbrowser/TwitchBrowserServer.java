@@ -85,8 +85,6 @@ public class TwitchBrowserServer {
 
         @Override
         public void getStreams(StreamsRequest request, StreamObserver<StreamsResponse> responseObserver) {
-            super.getStreams(request, responseObserver);
-
             try {
                 StreamsResponse response = twitchApiService.getStreams(request);
                 responseObserver.onNext(response);
@@ -100,8 +98,6 @@ public class TwitchBrowserServer {
 
         @Override
         public void getPopularGames(PopularGamesRequest request, StreamObserver<PopularGamesResponse> responseObserver) {
-            super.getPopularGames(request, responseObserver);
-
             try {
                 PopularGamesResponse response = twitchApiService.getPopularGames(request);
                 responseObserver.onNext(response);
