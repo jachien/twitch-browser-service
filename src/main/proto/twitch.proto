@@ -9,13 +9,15 @@ option java_outer_classname = "TwitchProto";
 package twitchbrowser;
 
 message TwitchStream {
-    string displayName = 1 [ (jsonPath) = "channel", (jsonPath) = "display_name" ];
-    string channelName = 2 [ (jsonPath) = "channel", (jsonPath) = "name" ];
-    string channelUrl = 3 [ (jsonPath) = "channel", (jsonPath) = "url" ];
-    int32 numViewers = 4 [ (jsonPath) = "viewers" ];
-    string status = 5 [ (jsonPath) = "channel", (jsonPath) = "status" ];
-    string gameName = 6 [ (jsonPath) = "game" ];
-    string previewUrl = 7 [ (jsonPath) = "preview", (jsonPath) = "medium" ];
+    int64 id = 1 [ (jsonPath) = "_id" ];
+    int64 channelId = 2 [ (jsonPath) = "channel", (jsonPath) = "_id" ];
+    string displayName = 3 [ (jsonPath) = "channel", (jsonPath) = "display_name" ];
+    string channelName = 4 [ (jsonPath) = "channel", (jsonPath) = "name" ];
+    string channelUrl = 5 [ (jsonPath) = "channel", (jsonPath) = "url" ];
+    int32 numViewers = 6 [ (jsonPath) = "viewers" ];
+    string status = 7 [ (jsonPath) = "channel", (jsonPath) = "status" ];
+    string gameName = 8 [ (jsonPath) = "game" ];
+    string previewUrl = 9 [ (jsonPath) = "preview", (jsonPath) = "medium" ];
 }
 
 message TwitchGame {
