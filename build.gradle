@@ -59,9 +59,6 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.http-client/google-http-client
     compile group: 'com.google.http-client', name: 'google-http-client', version: '1.22.0'
 
-    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
-    //compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.3'
-
     // https://mvnrepository.com/artifact/biz.paluch.redis/lettuce
     compile group: 'biz.paluch.redis', name: 'lettuce', version: '4.3.3.Final'
 
