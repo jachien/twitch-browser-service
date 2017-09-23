@@ -12,6 +12,9 @@ import org.jchien.twitchbrowser.cache.CacheResult;
 import org.jchien.twitchbrowser.cache.StringByteArrayCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -22,6 +25,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author jchien
  */
+@Component("cachingTwitchApiService")
 public class CachingTwitchApiService implements TwitchApiService {
     private static final Logger LOG = LoggerFactory.getLogger(CachingTwitchApiService.class);
 
@@ -41,8 +45,10 @@ public class CachingTwitchApiService implements TwitchApiService {
 
     private final TwitchApiService wrappedService;
 
-    public CachingTwitchApiService(TwitchApiService wrappedService) {
-        this.redisClient = RedisClient.create("redis://localhost:6379");
+    @Autowired
+    public CachingTwitchApiService(BasicTwitchApiService wrappedService,
+                                   @Qualifier("redisUri") String redisUri) {
+        this.redisClient = RedisClient.create(redisUri);
         this.asyncCommands = this.redisClient.connect(StringByteArrayCodec.INSTANCE).async();
         this.wrappedService = wrappedService;
     }
@@ -183,6 +189,7 @@ public class CachingTwitchApiService implements TwitchApiService {
         return currentTimestamp - cacheTimestamp;
     }
 
+    // shutdown is currently called by TwitchBrowserGrpcService, maybe it should be managed as part of the bean lifecycle
     @Override
     public void shutdown() {
         LOG.info("shutting down");

@@ -10,6 +10,9 @@ import org.jchien.twitchbrowser.StreamsResponse;
 import org.jchien.twitchbrowser.json.ProtoJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,6 +22,7 @@ import java.nio.charset.Charset;
 /**
  * @author jchien
  */
+@Component("basicTwitchApiService")
 public class BasicTwitchApiService implements TwitchApiService {
     private static final Logger LOG = LoggerFactory.getLogger(BasicTwitchApiService.class);
 
@@ -42,13 +46,20 @@ public class BasicTwitchApiService implements TwitchApiService {
 
     private static final int MAX_LIMIT = 25;
 
+    private String twitchApiClientId;
+
+    @Autowired
+    public BasicTwitchApiService(@Qualifier("twitchApiClientId") String twitchApiClientId) {
+        this.twitchApiClientId = twitchApiClientId;
+    }
+
     private HttpRequest buildGetRequest(GenericUrl url) throws IOException {
         final HttpRequestFactory httpReqFactory = HTTP_TRANSPORT.createRequestFactory();
 
         final HttpHeaders headers = new HttpHeaders()
                 .setAccept("application/vnd.twitchtv.v5+json")
                 .setAcceptEncoding("UTF-8")
-                .set("Client-ID", "ib5vu55l2rc4elcwyrqikyza4hio0y");
+                .set("Client-ID", twitchApiClientId);
 
         final HttpRequest httpReq = httpReqFactory.buildGetRequest(url)
                 .setHeaders(headers)
@@ -198,23 +209,5 @@ public class BasicTwitchApiService implements TwitchApiService {
 
     @Override
     public void shutdown() {
-    }
-
-    public static void main(String[] args) throws IOException {
-        BasicTwitchApiService s = new BasicTwitchApiService();
-        StreamsRequest streamsRequest = StreamsRequest.newBuilder()
-                .setGameName("Dota 2")
-                .setLimit(10)
-                .build();
-
-        StreamsResponse streamsResponse = s.getStreams(streamsRequest);
-        for (TwitchStream stream : streamsResponse.getStreamsList()) {
-            System.out.println(stream);
-        }
-
-        /*PopularGamesResponse popularGamesResponse = s.getPopularGames(PopularGamesRequest.newBuilder().setLimit(10).build());
-        for(TwitchGame g : popularGamesResponse.getGamesList()) {
-            System.out.println(g);
-        }*/
     }
 }

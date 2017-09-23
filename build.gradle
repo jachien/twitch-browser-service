@@ -44,6 +44,7 @@ repositories {
 // updating the version in our release process.
 def grpcVersion = '1.4.0' // CURRENT_GRPC_VERSION
 def log4j2Version = '2.8.2'
+def springVersion = '1.5.7.RELEASE'
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
@@ -52,6 +53,20 @@ dependencies {
     compile "io.grpc:grpc-netty:${grpcVersion}"
     compile "io.grpc:grpc-protobuf:${grpcVersion}"
     compile "io.grpc:grpc-stub:${grpcVersion}"
+
+    // spring boot using log4j2 instead of logback
+    // https://stackoverflow.com/a/28526317/7166633
+    [
+        [group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: "${springVersion}"],
+        [group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: "${springVersion}"],
+        [group: 'org.springframework.boot', name: 'spring-boot-starter-jetty', version: "${springVersion}"],
+    ].each { dep ->
+        compile(dep) {
+            exclude module: "spring-boot-starter-logging"
+            exclude module: "logback-classic"
+        }
+    }
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version: "${springVersion}"
 
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: "${log4j2Version}"
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: "${log4j2Version}"
@@ -108,23 +123,6 @@ idea {
     }
 }
 
-// Provide convenience executables for trying out the examples.
-apply plugin: 'application'
-
-startScripts.enabled = false
-
-task twitchBrowserServer(type: CreateStartScripts) {
-    mainClassName = 'org.jchien.twitchbrowser.TwitchBrowserServer'
-    applicationName = 'twitch-browser-server'
-    outputDir = new File(project.buildDir, 'tmp')
-    classpath = jar.outputs.files + project.configurations.runtime
-}
-
-applicationDistribution.into('bin') {
-    from(twitchBrowserServer)
-    fileMode = 0755
-}
-
 // https://docs.gradle.org/4.0/userguide/publishing_maven.html
 apply plugin: 'maven-publish'
 
@@ -142,8 +140,4 @@ publishing {
             }
         }
     }
-}
-
-springBoot {
-    mainClass="org.jchien.twitchbrowser.TwitchBrowserServer"
 }
