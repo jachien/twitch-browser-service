@@ -9,6 +9,7 @@
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 apply plugin: 'com.google.protobuf'
+apply plugin: 'org.springframework.boot'
 
 group="org.jchien.twitchbrowser"
 version="1.0"
@@ -22,7 +23,13 @@ buildscript {
         // ASSUMES GRADLE 2.12 OR HIGHER. Use plugin version 0.7.5 with earlier
         // gradle versions
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.0'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.6.RELEASE'
     }
+}
+
+jar {
+    baseName = 'twitch-browser-service'
+    version = project.version
 }
 
 repositories {
@@ -135,4 +142,8 @@ publishing {
             }
         }
     }
+}
+
+springBoot {
+    mainClass="org.jchien.twitchbrowser.TwitchBrowserServer"
 }
