@@ -5,5 +5,4 @@ publish local
     ./gradlew publishToMavenLocal
 
 run
-    ./gradlew installDist
-    ./build/install/twitch-browser-service/bin/twitch-browser-server
+    java -Dspring.profiles.active=dev -jar build/libs/twitch-browser-service-1.0.jar
