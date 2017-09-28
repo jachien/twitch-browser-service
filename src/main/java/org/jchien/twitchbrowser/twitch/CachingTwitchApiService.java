@@ -1,19 +1,19 @@
 package org.jchien.twitchbrowser.twitch;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.lambdaworks.redis.RedisClient;
+import com.lambdaworks.redis.RedisConnectionException;
+import com.lambdaworks.redis.RedisException;
 import com.lambdaworks.redis.RedisFuture;
 import com.lambdaworks.redis.api.async.RedisAsyncCommands;
 import org.jchien.twitchbrowser.PopularGamesRequest;
 import org.jchien.twitchbrowser.PopularGamesResponse;
 import org.jchien.twitchbrowser.StreamsRequest;
 import org.jchien.twitchbrowser.StreamsResponse;
+import org.jchien.twitchbrowser.cache.CacheClient;
 import org.jchien.twitchbrowser.cache.CacheResult;
-import org.jchien.twitchbrowser.cache.StringByteArrayCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -39,17 +39,14 @@ public class CachingTwitchApiService implements TwitchApiService {
 
     private static final int GAME_STREAM_LIMIT = 25;
 
-    private RedisClient redisClient;
-
-    private RedisAsyncCommands<String, byte[]> asyncCommands;
+    private CacheClient cacheClient;
 
     private final TwitchApiService wrappedService;
 
     @Autowired
     public CachingTwitchApiService(BasicTwitchApiService wrappedService,
-                                   @Qualifier("redisUri") String redisUri) {
-        this.redisClient = RedisClient.create(redisUri);
-        this.asyncCommands = this.redisClient.connect(StringByteArrayCodec.INSTANCE).async();
+                                   CacheClient cacheClient) {
+        this.cacheClient = cacheClient;
         this.wrappedService = wrappedService;
     }
 
@@ -92,7 +89,16 @@ public class CachingTwitchApiService implements TwitchApiService {
         response = response.toBuilder()
                 .setFromCache(true)
                 .build();
-        asyncCommands.set(cacheKey, response.toByteArray());
+
+        try {
+            final RedisAsyncCommands<String, byte[]> asyncCommands = cacheClient.getAsyncCommands();
+            asyncCommands.set(cacheKey, response.toByteArray());
+        } catch (RedisConnectionException e) {
+            // be less verbose if it's a connection problem
+            LOG.warn("unable to update cache: " + e.getMessage());
+        } catch (RedisException e) {
+            LOG.warn("unable to update cache", e);
+        }
     }
 
     private StreamsResponse getStaleResponseOrException(CacheResult cacheResult, long now, IOException e) throws IOException {
@@ -117,14 +123,18 @@ public class CachingTwitchApiService implements TwitchApiService {
         final String cacheKey = getCacheKey(request);
 
         final long cacheStart = System.currentTimeMillis();
-        final RedisFuture<byte[]> future = asyncCommands.get(cacheKey);
         byte[] bytes = null;
 
         try {
+            final RedisAsyncCommands<String, byte[]> asyncCommands = cacheClient.getAsyncCommands();
+            final RedisFuture<byte[]> future = asyncCommands.get(cacheKey);
             bytes = future.get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             LOG.warn("interrupted querying cache for " + getRequestString(request), e);
-        } catch (ExecutionException e) {
+        } catch (RedisConnectionException e) {
+            // be less verbose if it's a connection problem
+            LOG.warn("error querying cache for " + getRequestString(request) + ": " + e.getMessage());
+        } catch (RedisException | ExecutionException e) {
             LOG.warn("error querying cache for " + getRequestString(request), e);
         } catch (TimeoutException e) {
             // ain't nobody got time for that
@@ -197,8 +207,6 @@ public class CachingTwitchApiService implements TwitchApiService {
         // seems like log4j2 is getting shutdown before this log message happens so we'll print to stdout too
         System.out.println("CachingTwitchApiService: shutting down");
 
-        asyncCommands.close();
-        redisClient.shutdown();
         wrappedService.shutdown();
     }
 }
