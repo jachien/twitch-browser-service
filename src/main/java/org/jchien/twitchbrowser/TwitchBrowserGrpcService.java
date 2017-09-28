@@ -7,18 +7,18 @@ import org.jchien.twitchbrowser.twitch.CachingTwitchApiService;
 import org.jchien.twitchbrowser.twitch.TwitchApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 
 /**
  * @author jchien
  */
 @Component
-public class TwitchBrowserGrpcService implements CommandLineRunner, DisposableBean {
+public class TwitchBrowserGrpcService implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(TwitchBrowserGrpcService.class);
 
     private final int port;
@@ -41,12 +41,6 @@ public class TwitchBrowserGrpcService implements CommandLineRunner, DisposableBe
     public void run(String... args) throws Exception {
         start();
     }
-
-    @Override
-    public void destroy() throws Exception {
-        blockUntilShutdown();
-    }
-
 
     /** Start serving requests. */
     public void start() throws IOException {
@@ -77,6 +71,7 @@ public class TwitchBrowserGrpcService implements CommandLineRunner, DisposableBe
     /**
      * Await termination on the main thread since the grpc library uses daemon threads.
      */
+    @PreDestroy
     private void blockUntilShutdown() throws InterruptedException {
         if (server != null) {
             server.awaitTermination();
