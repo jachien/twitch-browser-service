@@ -8,6 +8,7 @@ import org.jchien.twitchbrowser.twitch.TwitchApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +27,7 @@ public class TwitchBrowserGrpcService implements CommandLineRunner {
     private final Server server;
 
     @Autowired
-    public TwitchBrowserGrpcService(int port, CachingTwitchApiService service) {
+    public TwitchBrowserGrpcService(int port, @Qualifier("cachingTwitchApiService") TwitchApiService service) {
         this(ServerBuilder.forPort(port), port, service);
     }
 

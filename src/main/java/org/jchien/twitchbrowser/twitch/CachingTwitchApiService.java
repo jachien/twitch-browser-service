@@ -14,6 +14,7 @@ import org.jchien.twitchbrowser.cache.CacheResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -44,7 +45,7 @@ public class CachingTwitchApiService implements TwitchApiService {
     private final TwitchApiService wrappedService;
 
     @Autowired
-    public CachingTwitchApiService(BasicTwitchApiService wrappedService,
+    public CachingTwitchApiService(@Qualifier("basicTwitchApiService") TwitchApiService wrappedService,
                                    CacheClient cacheClient) {
         this.cacheClient = cacheClient;
         this.wrappedService = wrappedService;
