@@ -20,19 +20,16 @@ public class TwitchBrowserServerConfig {
 
     @Bean(name="port")
     public int getPort() {
-        //System.out.println("======= port = " + props.getPort());
         return props.getPort();
     }
 
     @Bean(name="twitchApiClientId")
     public String getTwitchApiClientId() {
-        //System.out.println("======= twitchApiClientId = " + props.getTwitchApiClientId());
         return props.getTwitchApiClientId();
     }
 
     @Bean(name="redisUri")
     public String getRedisUri() {
-        //System.out.println("======= redisUri = " + props.getRedisUri());
         return props.getRedisUri();
     }
 }
