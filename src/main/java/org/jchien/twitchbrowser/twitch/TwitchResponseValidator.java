@@ -9,8 +9,7 @@ public class TwitchResponseValidator {
                 && !isEmpty(stream.getDisplayName())
                 && !isEmpty(stream.getGameName())
                 && !isEmpty(stream.getChannelName())
-                && !isEmpty(stream.getPreviewUrl())
-                && !isEmpty(stream.getStatus());
+                && !isEmpty(stream.getPreviewUrl());
     }
 
     private static boolean isEmpty(String s) {
