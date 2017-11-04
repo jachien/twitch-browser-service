@@ -38,7 +38,7 @@ public class CachingTwitchApiService implements TwitchApiService {
     // do fresh query if cache result is this old
     private static final long STALE_MS = TimeUnit.MINUTES.toMillis(2);
 
-    private static final int GAME_STREAM_LIMIT = 25;
+    public static final int GAME_STREAM_LIMIT = 25;
 
     private CacheClient cacheClient;
 
