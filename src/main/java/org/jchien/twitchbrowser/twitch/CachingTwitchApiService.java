@@ -36,7 +36,7 @@ public class CachingTwitchApiService implements TwitchApiService {
     private static final long TIMEOUT_MS = 200;
 
     // do fresh query if cache result is this old
-    private static final long STALE_MS = TimeUnit.MINUTES.toMillis(2);
+    public static final long STALE_MS = TimeUnit.MINUTES.toMillis(2);
 
     public static final int GAME_STREAM_LIMIT = 25;
 
