@@ -14,11 +14,11 @@ import java.io.IOException;
  * @author jchien
  */
 @Component
-public class KrakenHealthCheck implements HealthIndicator {
+public class KrakenApiHealthIndicator implements HealthIndicator {
     private TwitchApiService service;
 
     @Autowired
-    public KrakenHealthCheck(@Qualifier("basicTwitchApiService")  TwitchApiService service) {
+    public KrakenApiHealthIndicator(@Qualifier("basicTwitchApiService")  TwitchApiService service) {
         this.service = service;
     }
 
