@@ -1,8 +1,8 @@
-build
+### Build
     ./gradlew build
 
-publish local
+### Publish locally
     ./gradlew publishToMavenLocal
 
-run
+### Run
     java -Dspring.profiles.active=dev -jar build/libs/twitch-browser-service-1.0.jar
